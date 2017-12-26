@@ -1,0 +1,445 @@
+{
+  "draftNo": "2017030713611486",
+  "ownerNo": "201611072198636",
+  "title": "测试标题",
+  "subtitle": "测试自雷标题",
+  "cover": {
+    "providerCode": "qiniu",
+    "bucketCode": "default",
+    "fileId": "images-2017-03-18-l8ghru3dms8.jpg",
+    "origin": "https://devassetdef.moboo.ly/images-2017-03-18-l8ghru3dms8.jpg",
+    "ave": {
+      "ave": "0x726e6c",
+      "r": 114,
+      "g": 110,
+      "b": 108
+    },
+    "resolution": {
+      "width": 1024,
+      "height": 768
+    }
+  },
+  "fileNamePrefix": {
+    "providerCode": "qiniu",
+    "bucketCode": "creative",
+    "type": "path",
+    "fileId": "20170307187kvch-",
+    "origin": "https://devassetcreative.moboo.ly/20170307187kvch-",
+    "extStr01": null,
+    "extStr02": null
+  },
+  "detail": {
+    "uniqueId": "lpvknttaxpkcgqbl",
+    "version": 1,
+    "narrateTypeCode": "voiceover",
+    "themeCode": "complex",
+    "sections": [
+      {
+        "uniqueId": "2017030718tsd1e",
+        "type": null,
+        "bgColor": null,
+        "components": [
+          {
+            "uniqueId": "201703071836g1a",
+            "type": "image-fullwidth",
+            "moPic": false,
+            "positionX": 0,
+            "positionY": 0,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "rotateDegree": 0.0,
+            "assets": [
+              {
+                "type": "image",
+                "uniqueId": "hv5d6rj3txdi6nva.jpg",
+                "name": "Desert.jpg",
+                "providerCode": "qiniu",
+                "bucketCode": "creative",
+                "positionX": 0,
+                "positionY": 0,
+                "scaleX": 1.0,
+                "scaleY": 1.0,
+                "rotateDegree": 0.0,
+                "ave": "0x80696b",
+                "aveRgb": {
+                  "ave": "0x80696b",
+                  "r": 128,
+                  "g": 105,
+                  "b": 107
+                },
+                "width": 1024,
+                "height": 768,
+                "localFile": false,
+                "caption":{
+                  "type":"text",
+                  "uniqueId":"2017032416e9dy",
+                  "positionX":0,
+                  "positionY":0,
+                  "scaleX":1,
+                  "scaleY":1,
+                  "rotateDegree":0,
+                  "width":0,
+                  "height":0,
+                  "content":"测试caption",
+                  "bgColor":"transparent",
+                  "fontFamily":"微软雅黑",
+                  "fontWeight":"normal",
+                  "fontStyle":"normal",
+                  "fontColor":"rgb(255,255,255)",
+                  "fontSize":18,
+                  "align":"center",
+                  "verticalAlign":"middle"
+                }
+              }
+            ],
+            "actions": []
+          },
+          {
+            "uniqueId": "2017032411tpjac",
+            "type": "text-fullwidth",
+            "moPic": false,
+            "positionX": 0,
+            "positionY": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "rotateDegree": 0,
+            "assets": [
+              {
+                "type": "text",
+                "uniqueId": "20170324117zeii",
+                "positionX": 0,
+                "positionY": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "rotateDegree": 0,
+                "width": 0,
+                "height": 178,
+                "content": "",
+                "bgColor": "rgb(0,0,0)",
+                "fontFamily": "微软雅黑",
+                "fontWeight": "normal",
+                "fontStyle": "normal",
+                "fontColor": "rgb(255,255,255)",
+                "fontSize": 18,
+                "align": "center"
+              }
+            ],
+            "actions": [
+            ]
+          },
+          {
+            "uniqueId": "2017032016w2c1c",
+            "type": "image-fullwidth",
+            "moPic": false,
+            "positionX": 0,
+            "positionY": 0,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "rotateDegree": 0.0,
+            "assets": [
+              {
+                "type": "image",
+                "uniqueId": "70bhbietj9vnkt.jpg",
+                "name": "Hydrangeas.jpg",
+                "providerCode": "qiniu",
+                "bucketCode": "creative",
+                "positionX": 0,
+                "positionY": 0,
+                "scaleX": 1.0,
+                "scaleY": 1.0,
+                "rotateDegree": 0.0,
+                "ave": "0x435c33",
+                "aveRgb": {
+                  "ave": "0x435c33",
+                  "r": 67,
+                  "g": 92,
+                  "b": 51
+                },
+                "width": 1024,
+                "height": 768,
+                "localFile": false
+              }
+            ],
+            "actions": []
+          },
+          {
+            "uniqueId": "20170320164p6me",
+            "type": "image-fullwidth",
+            "moPic": false,
+            "positionX": 0,
+            "positionY": 0,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "rotateDegree": 0.0,
+            "assets": [
+              {
+                "type": "image",
+                "uniqueId": "b83zgpytyetqiibj.jpg",
+                "name": "Jellyfish.jpg",
+                "providerCode": "qiniu",
+                "bucketCode": "creative",
+                "positionX": 0,
+                "positionY": 0,
+                "scaleX": 1.0,
+                "scaleY": 1.0,
+                "rotateDegree": 0.0,
+                "ave": "0x2d3265",
+                "aveRgb": {
+                  "ave": "0x2d3265",
+                  "r": 45,
+                  "g": 50,
+                  "b": 101
+                },
+                "width": 1024,
+                "height": 768,
+                "localFile": false
+              }
+            ],
+            "actions": []
+          },
+          {
+            "uniqueId": "2017032016tyw31",
+            "type": "image-fullwidth",
+            "moPic": false,
+            "positionX": 0,
+            "positionY": 0,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "rotateDegree": 0.0,
+            "assets": [
+              {
+                "type": "image",
+                "uniqueId": "s1akdqcrbg3qsngg.jpg",
+                "name": "Desert.jpg",
+                "providerCode": "qiniu",
+                "bucketCode": "creative",
+                "positionX": 0,
+                "positionY": 0,
+                "scaleX": 1.0,
+                "scaleY": 1.0,
+                "rotateDegree": 0.0,
+                "ave": "0x80696b",
+                "aveRgb": {
+                  "ave": "0x80696b",
+                  "r": 128,
+                  "g": 105,
+                  "b": 107
+                },
+                "width": 1024,
+                "height": 768,
+                "localFile": false
+              }
+            ],
+            "actions": []
+          }
+        ],
+        "audios": [
+          {
+            "type": "audio",
+            "uniqueId": "2017030820tglq.mp3",
+            "providerCode": "qiniu",
+            "bucketCode": "creative",
+            "duration": 6.8,
+            "volume": 1.0,
+            "fileSize": 0,
+            "originalUniqueId": "jxxfbv3jmitkhnw.mp3",
+            "originalProviderCode": "qiniu",
+            "originalBucketCode": "creative",
+            "originalDuration": 348.1,
+            "editParam": {
+              "cropStartTime": 8.2
+            },
+            "localFile": false
+          }
+        ],
+        "syncStatus": null
+      },
+      {
+        "uniqueId": "2017032016wwxoh",
+        "type": null,
+        "bgColor": null,
+        "components": [
+          {
+            "uniqueId": "2017032016zzryf",
+            "type": "image-fullwidth",
+            "moPic": false,
+            "positionX": 0,
+            "positionY": 0,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "rotateDegree": 0.0,
+            "assets": [
+              {
+                "type": "image",
+                "uniqueId": "jyjj78l4v2chale.jpg",
+                "name": "Hydrangeas.jpg",
+                "providerCode": "qiniu",
+                "bucketCode": "creative",
+                "positionX": 0,
+                "positionY": 0,
+                "scaleX": 1.0,
+                "scaleY": 1.0,
+                "rotateDegree": 0.0,
+                "ave": "0x435c33",
+                "aveRgb": {
+                  "ave": "0x435c33",
+                  "r": 67,
+                  "g": 92,
+                  "b": 51
+                },
+                "width": 1024,
+                "height": 768,
+                "localFile": false
+              }
+            ],
+            "actions": []
+          },
+          {
+            "uniqueId": "2017032016ombto",
+            "type": "image-fullwidth",
+            "moPic": false,
+            "positionX": 0,
+            "positionY": 0,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "rotateDegree": 0.0,
+            "assets": [
+              {
+                "type": "image",
+                "uniqueId": "70an5kagox3hi5re.jpg",
+                "name": "Koala.jpg",
+                "providerCode": "qiniu",
+                "bucketCode": "creative",
+                "positionX": 0,
+                "positionY": 0,
+                "scaleX": 1.0,
+                "scaleY": 1.0,
+                "rotateDegree": 0.0,
+                "ave": "0x7f7466",
+                "aveRgb": {
+                  "ave": "0x7f7466",
+                  "r": 127,
+                  "g": 116,
+                  "b": 102
+                },
+                "width": 1024,
+                "height": 768,
+                "localFile": false
+              }
+            ],
+            "actions": []
+          },
+          {
+            "uniqueId": "2017032016iq9n",
+            "type": "image-fullwidth",
+            "moPic": false,
+            "positionX": 0,
+            "positionY": 0,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "rotateDegree": 0.0,
+            "assets": [
+              {
+                "type": "image",
+                "uniqueId": "ylyioocvvszw7gkb.jpg",
+                "name": "Lighthouse.jpg",
+                "providerCode": "qiniu",
+                "bucketCode": "creative",
+                "positionX": 0,
+                "positionY": 0,
+                "scaleX": 1.0,
+                "scaleY": 1.0,
+                "rotateDegree": 0.0,
+                "ave": "0x726e6c",
+                "aveRgb": {
+                  "ave": "0x726e6c",
+                  "r": 114,
+                  "g": 110,
+                  "b": 108
+                },
+                "width": 1024,
+                "height": 768,
+                "localFile": false
+              }
+            ],
+            "actions": []
+          }
+        ],
+        "audios": [
+          {
+            "type": "audio",
+            "uniqueId": "NtO9krnUxgTfCM.wav",
+            "providerCode": "qiniu",
+            "bucketCode": "creative",
+            "duration": 8.5,
+            "volume": 1.0,
+            "fileSize": 0,
+            "originalUniqueId": "NtO9krnUxgTfCM.wav",
+            "originalProviderCode": "qiniu",
+            "originalBucketCode": "creative",
+            "originalDuration": 8.5,
+            "editParam": {
+              "cropStartTime": 0.0
+            },
+            "localFile": false
+          }
+        ],
+        "syncStatus": null
+      }
+    ],
+    "bgMusics": [
+      {
+        "uniqueId": "ywyws1xizlbcv7fg",
+        "startIndex": 0,
+        "endIndex": 0,
+        "cover": {
+          "type": "image",
+          "uniqueId": "1478571412572-2016-11-08-d68571cb-936e-4ac9-99b0-45c5b1ced61d.jpg",
+          "providerCode": "qiniu",
+          "bucketCode": "default",
+          "positionX": 0,
+          "positionY": 0,
+          "scaleX": 0.0,
+          "scaleY": 0.0,
+          "rotateDegree": 0.0,
+          "ave": "0x5b5342",
+          "aveRgb": {
+            "ave": "0x5b5342",
+            "r": 91,
+            "g": 83,
+            "b": 66
+          },
+          "width": 802,
+          "height": 602,
+          "localFile": false
+        },
+        "audio": {
+          "type": "audio",
+          "uniqueId": "audios-2017-01-05-aa38f518-be66-4dbc-901f-faa648c2a426.mp3",
+          "name": "简约",
+          "providerCode": "qiniu",
+          "bucketCode": "library",
+          "duration": 252.2645,
+          "volume": 1.0,
+          "fileSize": 0,
+          "originalDuration": 0.0,
+          "localFile": false
+        }
+      }
+    ],
+    "bgColor": "#000000",
+    "fontFamily": null,
+    "fontWeight": null,
+    "fontStyle": null,
+    "fontColor": null,
+    "fontSize": 0,
+    "align": null,
+    "verticalAlign": null,
+    "resources": null,
+    "childNodeNos": [
+      "2017030718tsd1e",
+      "2017032016wwxoh"
+    ],
+    "syncStatus": null
+  }
+}

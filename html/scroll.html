@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title></title>
+    <script type="text/javascript" src="../src/scroll/moboo.math.js"></script>
+    <script type="text/javascript" src="../src/scroll/moboolib.scroll.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #242424;
+        }
+
+        .episode-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            transform: translate3d(0, 0, 0);
+        }
+
+        .scroll-container {
+            position: absolute;
+            width: 100%;
+            transform: translate3d(0, 0, 0);
+        }
+    </style>
+</head>
+<body>
+<div class="episode-container">
+    <div class="scroll-container" id="scrollContainer"></div>
+</div>
+
+<script>
+    var scrollContainer = document.getElementById("scrollContainer");
+
+    for (var i = 0; i < 20; i++) {
+
+        var itemElement = document.createElement("div");
+
+        itemElement.style.cssText = "font-size:30px;height:200px;overflow:hidden;width:100%;box-sizing:border-box;text-align:center;transform:translate3d(0,0,0)";
+
+        var imageWrapElement = document.createElement("div");
+        imageWrapElement.setAttribute("class", "episode-cover");
+
+        var image = document.createElement("img");
+        image.src = "../images/test/img" + (i + 1) + ".jpg";
+        image.style.cssText = "width:100%";
+
+        imageWrapElement.appendChild(image);
+        itemElement.appendChild(imageWrapElement);
+        scrollContainer.appendChild(itemElement);
+    }
+
+    var acceleratingIntervalId, acceleratingMoveSpeedMax, acceleratingMoveTimesMax, acceleratingSpentTimeMax, acceleratingSpentTimeOffset, acceleratingStartTime, acceleratingSpentTime, acceleratingMoveDirection;
+    var scrollTop = 0, lastDeltaY;
+    var lastSpeeds = [];
+    var episodeCover = document.getElementsByClassName("episode-cover");
+    //
+    var mobooScroll = new MobooLib.Scroll(scrollContainer);
+
+    mobooScroll.setOnScrollingListener(function (deltaY, deltaT) {
+
+        scrolling(deltaY, deltaT);
+    });
+    //
+    mobooScroll.setOnScrollEndListener(function (totalY, totalT) {
+        scrollEnd(totalY, totalT);
+
+    });
+    //
+    var wHeight = document.documentElement.clientHeight;
+    var scrollContainerHeight = scrollContainer.clientHeight;
+
+    function scrolling(deltaY, deltaT) {
+        scrollTop += deltaY;
+
+        lastDeltaY = deltaY;
+        lastSpeeds.push(deltaY / deltaT);
+
+        var range = {
+            start: 0,
+            end: 200
+        };
+        //
+        for (var i = 0; i < episodeCover.length; i++) {
+            var episodeCoverReactTop = episodeCover[i].getBoundingClientRect().top;
+            var percent = (range.end - episodeCoverReactTop) / (range.end - range.start);
+            var scaleRate = percent * 0.5;
+
+            if (episodeCoverReactTop < range.end && episodeCoverReactTop > range.start) {
+                episodeCover[i].style.transform = "scale(" + (1 + scaleRate) + ") translate3d(0,0,0)";
+                episodeCover[i].style.webkitTransform = "scale(" + (1 + scaleRate) + ") translate3d(0,0,0)";
+            }
+        }
+        if (scrollTop > 0) {
+            scrollTop = 0;
+        }
+
+        if (Math.abs(scrollTop) >= (scrollContainerHeight - wHeight)) {
+            scrollTop = -(scrollContainerHeight - wHeight)
+        }
+
+        //
+        scrollContainer.style.transform = "translate3d(0," + scrollTop + "px,0)";
+    }
+
+    function scrollEnd(totalY, totalT) {
+
+        //
+        acceleratingMoveDirection = lastDeltaY / Math.abs(lastDeltaY);
+
+        var speedTimes = lastSpeeds.length;
+        var speedSum = 0;
+        var speedCount = 1;
+
+        for (var t = speedTimes - 1; t >= 0; t--) {
+            speedSum += Math.abs(lastSpeeds[t]);
+
+            if (speedCount > 3) {
+                break;
+            }
+
+            speedCount++;
+        }
+        lastSpeeds.length = 0;
+
+
+        acceleratingMoveSpeedMax = Math.min(
+                speedSum / speedCount * 0.45,
+                //the total limit is fixed, the distance speed limit.
+                Math.min(Math.abs(totalY) / 150, 2.1)
+        );
+
+        //the accelerate times.
+        acceleratingMoveTimesMax = 2.1 / 0.03;
+
+        //the spend time.
+        acceleratingSpentTimeMax = 10 * acceleratingMoveTimesMax;
+        acceleratingSpentTimeOffset = acceleratingSpentTimeMax * (2.1 - acceleratingMoveSpeedMax) * 0.8 / 2.1;
+
+        acceleratingStartTime = new Date().getTime();
+        acceleratingSpentTime = 0;
+
+        //
+        removeAcceleratingInterval();
+
+        //use the interval for acceleration.
+        acceleratingIntervalId = setInterval(
+                function () {
+                    //
+                    var tempSpentTime = new Date().getTime() - acceleratingStartTime;
+
+                    //
+                    var nextDistance = 2.1 *
+                            Moboo.Math.getBezierArea(
+                                    0.0, 0.0,
+                                    acceleratingSpentTimeOffset + acceleratingSpentTime,
+                                    Math.min(acceleratingSpentTimeOffset + tempSpentTime, acceleratingSpentTimeMax),
+                                    10 / 2,
+                                    acceleratingSpentTimeMax
+                            );
+
+                    //
+                    if (acceleratingSpentTimeOffset + acceleratingSpentTime > acceleratingSpentTimeMax || nextDistance < 0.001) {
+                        //
+                        removeAcceleratingInterval();
+                        //
+                    } else {
+                        //console.log(nextDistance);
+                        scrolling(nextDistance * acceleratingMoveDirection, 10);
+                    }
+
+                    //
+                    acceleratingSpentTime = tempSpentTime;
+                },
+                10
+        );
+    }
+    //
+    function removeAcceleratingInterval() {
+        //
+        if (acceleratingIntervalId > 0) {
+            //
+            clearInterval(acceleratingIntervalId);
+
+            //
+            acceleratingIntervalId = -1;
+        }
+    }
+</script>
+</body>
+</html>

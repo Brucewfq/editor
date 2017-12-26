@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="mobooEditor">
+<head>
+    <meta charset="UTF-8">
+    <title>Directive</title>
+    <!--//css-->
+    <link rel="stylesheet" href="../static/css/moboo.editor.css"/>
+    <!--//3rd javascripts files-->
+    <script type="text/javascript" src="../src/3rd/angular.min.js"></script>
+    <script type="text/javascript" src="../src/3rd/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="../src/3rd/webuploader.js"></script>
+    <script type="text/javascript" src="../src/3rd/angular.scrollbar.js"></script>
+    <script type="text/javascript" src="../src/3rd/elastic.js"></script>
+    <script type="text/javascript" src="../src/3rd/upload.file.js"></script>
+    <script type="text/javascript" src="../src/3rd/ng-sortable.js"></script>
+    <script type="text/javascript" src="../src/3rd/Sortable.js"></script>
+    <!--//-->
+    <script type="text/javascript" src="https://assetlib.moboo.ly/moboolib.functions-1.0.0.22.min.js"></script>
+    <!--<script type="text/javascript" src="https://assetlib.moboo.ly/moboolib.popup-1.0.0.22.min.js"></script>-->
+
+    <script type="text/javascript" src="../src/popup/moboo.popup.js"></script>
+    <script type="text/javascript" src="../src/audiorecord/moboolib.audiorecord.js"></script>
+    <script type="text/javascript" src="../src/audiocrop/moboolib.audiocrop.js"></script>
+    <script type="text/javascript" src="../src/dragbar/moboolib.dragbar.js"></script>
+    <!--//-->
+    <link rel="stylesheet" href="https://assetlib.moboo.ly/moboo.displayer.loading-1.1.1.1523.min.css">
+    <link rel="stylesheet" href="https://assetlib.moboo.ly/moboo.displayer-1.1.1.1523.min.css">
+    <!--scripts-->
+    <script type="text/javascript"
+            src="https://assetlib.moboo.ly/moboo.displayer.loading-1.1.1.1523.min.js"></script>
+    <!--the root controller-->
+<body ng-controller="rootController">
+<div class="editor-shade-layer" ng-if="showEditorShadeLayer">
+    <div class="editor-loading-shape">
+        <div class="ball-clip-rotate">
+            <div></div>
+        </div>
+        <span>加载中...</span>
+    </div>
+</div>
+<!--header start-->
+<div ng-controller="headerController" class="editor-header">
+    <h2 class="moboo-logo">
+        <a href="/" target="_blank">logo</a>
+    </h2>
+
+    <div class="float-right editor-nav">
+        <div class="theme" data-action="theme-modal-visible" ng-click="launchThemeSelector();"
+             style="background-image:url(/static/images/editor/theme.png)">
+            主题
+        </div>
+
+        <div class="editor-bgm-btn" data-action="music-library-visible" ng-click="launchBgmSelector();"
+             ng-class="{'on':editor.draft.node.bgMusics.length>0}">
+            背景音乐
+        </div>
+        <button class="editor-preview-btn editor-button"
+                ng-class="{'less-size-border-button':checkPublishStatus(),'preview-disabled-button':!checkPublishStatus()}"
+                ng-click="launchMobooPreview(1501);">预览
+        </button>
+
+        <img src="/static/images/editor/teach_preview.png" class="guide-eight guide-width"
+             ng-show="editor.draft.node.narrateTypeCode=='voiceover'&&showNoviceGuide(1501)" alt=""/>
+        <img src="/static/images/editor/teach_online.png" class="guide-nine guide-width"
+             ng-show="editor.draft.node.narrateTypeCode=='voiceover'&&showNoviceGuide(1601)" alt=""/>
+
+        <div class="editor-publish-btn">
+            <a class=" less-size-button"
+               ng-class="{'linear-gradient-button':checkPublishStatus(),'publish-disable-button':!checkPublishStatus()}"
+               ng-click="launchMobooPublish(1601);">
+                <span ng-if="editor.draft.episode==null||editor.draft.episode.validStatus.code!='valid'">投稿</span>
+                <span ng-if="editor.draft.episode!=null&&editor.draft.episode.validStatus.code=='valid'">更新</span>
+            </a>
+        </div>
+    </div>
+</div>
+<!--header end-->
+
+<!--left thumb start-->
+<div ng-controller="thumbController" class="editor-thumb-wrap" id="editorThumbWrap">
+
+    <div class="editor-thumb-cover">
+        <span class="section-index">封面</span>
+
+        <div class="editor-thumb-cover-image" ng-click="scrollToCover($event)">
+            <img ng-src="{{editor.draft.cover.origin}}?imageView2/1/w/80/h/80/ignore-error/1" alt=""/>
+        </div>
+    </div>
+
+    <div class="editor-section-move-options" ng-show="editor.popupSwitches.thumbSectionMovePopup"
+         ng-click="moveSectionSort($event)"
+         ng-style="{'top':editor.popupLocation+'px'}">
+
+        <span data-action="moveUp"
+              ng-if="editor.sectionOperationOptions.sectionMoveUpBtnIsVisible"
+              style="background-image:url(/static/images/editor/upward.png)">上移</span>
+        <span data-action="moveDown"
+              ng-if="editor.sectionOperationOptions.sectionMoveDownBtnIsVisible"
+              style="background-image:url(/static/images/editor/downward.png)">下移</span>
+        <span data-action="delete" style="background-image:url(/static/images/editor/delete.png)">删除</span>
+    </div>
+
+    <div class="editor-thumb-section-root" ng-repeat="(sectionIndex,section) in editor.draft.node.sections">
+        <span class="section-index" ng-bind="sectionIndex>=9?(sectionIndex+1):'0'+(sectionIndex+1)"></span>
+
+        <div class="editor-thumb-section">
+            <div class="editor-section-operation-btn" data-action="moveOptions"
+                 ng-click="showMoveSectionOptions(sectionIndex,$event)"></div>
+
+            <div as-sortable="dragControlListeners" data-ng-model="section.components"
+                 ng-if="section.components.length>0">
+                <div class="editor-thumb-component-root"
+                     ng-repeat="(componentIndex,component) in section.components"
+                     as-sortable-item>
+                    <div class="editor-thumb-asset-root" id="editorThumbAsset{{sectionIndex}}{{componentIndex}}"
+                         ng-repeat="asset in component.assets"
+                         ng-click="scrollToCurrentComponent(sectionIndex, componentIndex,$event)"
+                         as-sortable-item-handle>
+                        <div class="editor-thumb-asset-image"
+                             ng-if="asset!=null&&asset!=undefined&&asset.type=='image'">
+                            <img ng-if="viewImageUrlAndFilePrefix!=null"
+                                 ng-src="{{viewImageUrlAndFilePrefix+asset.uniqueId}}?imageView2/1/w/80/h/80/ignore-error/1"
+                                 alt=""/>
+                        </div>
+
+                        <div class="editor-thumb-asset-image"
+                             ng-style="{'background-color':asset}"
+                             ng-if="asset!=null&&asset!=undefined&&asset.type=='video'">
+                            <img ng-if="viewVideoUrlAndFilePrefix!=null"
+                                 ng-src="{{viewVideoUrlAndFilePrefix+asset.uniqueId}}?vframe/jpg/offset/0/w/80/h/80"
+                                 alt=""/>
+                        </div>
+
+                        <div class="editor-thumb-asset-text"
+                             ng-style="{'background-color':editor.draft.node.bgColor}"
+                             ng-if="asset!=null&&asset!=undefined&&asset.type=='text'">
+                            <span ng-bind="asset.content" ng-style="{'color':asset.fontColor}"></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div as-sortable="dragControlListeners" data-ng-model="section.components"
+                 ng-if="section.components.length==0"
+                 is-disabled="{{section.components.length==0}}">
+                <div as-sortable-item ng-repeat="(componentIndex,component) in section.components">
+                    <div as-sortable-item-handle></div>
+                </div>
+                <div as-sortable-item ng-if="section.components.length==0">
+                    <div class="editor-thumb-asset-root-empty" as-sortable-item-handle></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--left thumb end-->
+
+<!--main start-->
+<div ng-controller="mainController" class="editor-main-wrap" id="editorMainWrap">
+    <div class="editor-main-container">
+        <span class="cover-stamp">封面</span>
+
+        <div class="editor-cover"
+             ng-style="getCoverResolution(editor.draft.cover.resolution.width,editor.draft.cover.resolution.height,180)"
+             ng-class="{'exist-cover':editor.draft.cover!=null&&editor.draft.cover.origin!=null&&editor.draft.cover.origin!=''}">
+
+            <img class="editor-cover-image"
+                 ng-src="{{editor.draft.cover.origin}}?imageView2/2/w/720/interlace/1/ignore-error/1"
+                 id="editorCoverImage"
+                 ng-if="editor.draft.cover!=null&&editor.draft.cover.origin!=null&&editor.draft.cover.origin!=''"
+                 ng-style="getCoverResolution(editor.draft.cover.resolution.width,editor.draft.cover.resolution.height,180)"
+                 alt=""/>
+
+            <div id="coverImageUploadBtn" class="editor-cover-upload-btn" data-content="请添加封面图片"
+                 ng-click="select(1001)">+
+            </div>
+        </div>
+        <img src="/static/images/editor/teach_cover.png" class="guide-three-one guide-width"
+             ng-show="editor.draft.node.narrateTypeCode=='voiceover'&&showNoviceGuide(1001)" alt=""/>
+
+        <div class="title-container">
+            <textarea type="text" rows="1" class="title animate msd-elastic: \n;" placeholder="输入标题"
+                      id="mobooTitle"
+                      ng-keyup="subStringForText('title',$event)"
+                      ng-click="select(1002)"
+                      data-ng-model="editor.draft.title"></textarea>
+            <img src="/static/images/editor/teach_name.png" class="guide-three-two guide-width"
+                 ng-show="editor.draft.node.narrateTypeCode=='voiceover'&&showNoviceGuide(1002)"
+                 alt=""/>
+        </div>
+
+        <div ng-click="createBlankSection(0,'section.add',$event,1101)"
+             class="editor-create-section-btn"
+             ng-class="{'hide':editor.draft.node.sections.length>=maxSectionsLength}">
+            +
+            <img src="/static/images/editor/teach_add1.png" class="guide-four guide-width"
+                 ng-show="editor.draft.node.narrateTypeCode=='voiceover'&&showNoviceGuide(1101)" alt=""/>
+        </div>
+
+        <!--<div class="editor-create-section-btn upload-image-btn" ng-click="setUserOps(0,'section.add',$event)"
+             ng-show="editor.draft.node.narrateTypeCode=='dialogue'">
+        </div>-->
+
+        <div class="editor-section-move-options" ng-show="editor.popupSwitches.sectionMovePopup"
+             ng-click="handleSection($event)"
+             ng-style="{'top':(editor.popupLocation-15)+'px'}">
+
+                <span class="move-up-btn" data-action="moveUp"
+                      ng-if="editor.sectionOperationOptions.sectionMoveUpBtnIsVisible"
+                      style="background-image:url(/static/images/editor/upward.png)">上移</span>
+            <span class="move-down-btn" data-action="moveDown"
+                  ng-if="editor.sectionOperationOptions.sectionMoveDownBtnIsVisible"
+                  style="background-image:url(/static/images/editor/downward.png)">下移</span>
+            <span data-action="delete" style="background-image:url(/static/images/editor/delete.png)">删除</span>
+            <span data-action="addEvnMusic" ng-if="editor.draft.node.narrateTypeCode=='dialogue'"
+                  style="background-image:url(/static/images/editor/add_effect_music.png)">环境音</span>
+        </div>
+
+        <div class="editor-section-root" ng-repeat="(sectionIndex,section) in editor.draft.node.sections"
+             ng-class="{'first':$first,'last':$last}">
+
+            <div class="section-title">
+                <div class="title-tag">
+                    章节{{sectionIndex>=9?(sectionIndex+1):'0'+(sectionIndex+1)}}
+                </div>
+
+                <textarea class="title-content animate msd-elastic: \n;" type="text"
+                          data-type="section.title.modify"
+                          placeholder="输入章节名称"
+                          data-ng-model="section.title.content"
+                          ng-focus="setIndex($event,sectionIndex)"
+                          ng-keyup="subStringForText('section.title',$event)"
+                          ng-blur="modifySectionTitle(sectionIndex,$event)"
+                          ng-style="{'textAlign':asset.align,'fontSize':asset.fontSize+'px','font-family':asset.fontFamily,'fontWeight':asset.fontWeight,'fontStyle':asset.fontStyle,'color':asset.fontColor}"
+                          rows="1"></textarea>
+            </div>
+
+            <div class="editor-section-container"
+                 ng-class="{'dialogue':editor.draft.node.narrateTypeCode=='dialogue','noVoiceOver':section.audios[0]==null}">
+                <div class="section-index">
+                    <span class="current">章节{{sectionIndex>=9?(sectionIndex+1):'0'+(sectionIndex+1)}}</span>
+                    /
+                    <span class="total">{{editor.draft.node.sections.length}}</span>
+                </div>
+
+                <div class="editor-section-bg-color" ng-if="section.audios[0]!=null"
+                     ng-style="{'height':getSectionDisplayHeight(sectionIndex,section.audios[0].duration)+92+'px'}">
+                </div>
+
+                <div class="editor-add-component">
+                    <a class="editor-add-component-btn" ng-click="showAddElementPopup(sectionIndex,-1,$event,1301)"
+                       data-length="{{section.components.length}}"
+                       ng-class="{'hide':section.components.length>=maxComponentsLength}">
+                        +
+                    </a>
+
+                    <img src="/static/images/editor/teach_add2.png" class="guide-six guide-width"
+                         ng-show="editor.draft.node.narrateTypeCode=='voiceover'&&showNoviceGuide(1301)" alt=""/>
+                </div>
+
+                <span class="editor-section-operation-btn" data-action="moveOptions"
+                      ng-click="showHandleSectionOptions(sectionIndex,$event)"></span>
+
+                <div class="editor-section"
+                     ng-style="{'min-height':getSectionDisplayHeight(sectionIndex,section.audios[0].duration)+52+'px'}">
+
+                    <div id="editorSection{{sectionIndex}}" class="editor-section-content">
+                        <div class="editor-section-audio-root">
+                            <div ng-show="editor.draft.node.narrateTypeCode=='voiceover'">
+                                <div class="editor-section-audio" ng-show="section.audios[0]!=null"
+                                     ng-style="{'height':getSectionDisplayHeight(sectionIndex,section.audios[0].duration)+'px'}"
+                                     ng-click="launchAudioCrop(sectionIndex,$event)">
+                                <span class="editor-section-audio-bar"
+                                      ng-style="{'height':getSectionDisplayHeight(sectionIndex,section.audios[0].duration)+'px'}"></span>
+                                </div>
+
+                                <div class="editor-add-section-audio-btn"
+                                     ng-click="launchAudioRecord(sectionIndex,'section.audio.add',$event,1201)"
+                                     ng-show="section.audios[0]==null">
+                                    <img src="/static/images/editor/teach_record.png" class="guide-five guide-width"
+                                         ng-show="editor.draft.node.narrateTypeCode=='voiceover'&&showNoviceGuide(1201)"
+                                         alt=""/>
+                                </div>
+                            </div>
+
+                            <div class="evn-music-btn"
+                                 ng-show="editor.draft.node.narrateTypeCode=='dialogue'&&section.audios[0]!=null"
+                                 ng-click="launchEvnMusic(sectionIndex,'section.audio.modify',$event)">
+
+                            </div>
+                        </div>
+
+                        <div class="editor-component-root" ng-repeat="(componentIndex,component) in section.components"
+                             ng-class="{'first':$first,'last':$last}"
+                             id="editorComponent{{sectionIndex}}{{componentIndex}}">
+                            <div ng-repeat="asset in component.assets">
+
+                                <div class="editor-asset-root"
+                                     ng-click="handleComponent(sectionIndex,componentIndex,component,asset,$event,1401)">
+
+                                    <img src="/static/images/editor/teach_pic.png" class="guide-seven guide-width"
+                                         ng-show="editor.draft.node.narrateTypeCode=='voiceover'&&showNoviceGuide(1401)"
+                                         alt=""/>
+
+                                    <div class="editor-move-component">
+                                        <button class="editor-moveup-btn" data-action="moveUp"></button>
+                                        <button class="editor-movedown-btn" data-action="moveDown"></button>
+                                    </div>
+
+                                    <div class="editor-asset-image" ng-if="asset.type=='image'"
+                                         ng-class="{'asset-image-fullwidth':component.type=='image-fullwidth','asset-image-fullscreen':component.type=='image-fullscreen'}">
+                                        <div class="editor-asset-caption"
+                                             id="imageCaption{{sectionIndex}}{{componentIndex}}"
+                                             ng-class="{'top':asset.caption.verticalAlign=='top','middle':asset.caption.verticalAlign=='middle','bottom':asset.caption.verticalAlign=='bottom','caption-exsit':initShowCaption(asset)}"
+                                             ng-show="!component.moPic&&asset.uniqueId!=null&&asset.uniqueId!=undefined">
+                                    <textarea type="text" placeholder="输入字幕"
+                                              readonly="readonly"
+                                              data-ng-model="asset.caption.content"
+                                              class="editor-asset-caption-content animate msd-elastic: \n;"
+                                              ng-style="{'textAlign':asset.caption.align,'fontSize':asset.caption.fontSize+'px','fontFamily':asset.caption.fontFamily,'fontWeight':asset.caption.fontWeight,'fontStyle':asset.caption.fontStyle,'color':asset.caption.fontColor}"
+                                              rows="1"></textarea>
+                                            <span class="delete-btn" data-type="image.caption.modify"></span>
+                                        </div>
+
+                                        <div class="editor-asset-image-shade-layer"
+                                             ng-if="asset.caption!=null&&asset.caption.content!=null&&asset.caption.content!=''"></div>
+                                        <img ng-if="viewImageUrlAndFilePrefix!=null"
+                                             draggable="false"
+                                             ng-src="{{viewImageUrlAndFilePrefix+asset.uniqueId}}{{getImageSuffix(asset)}}/ignore-error/1"
+                                             data-type="multimedia"
+                                             ng-style="getAssetStyle(component,asset,'300')"
+                                             alt=""/>
+                                    </div>
+
+                                    <div class="editor-asset-video" ng-if="asset.type=='video'"
+                                         ng-class="{'asset-video-fullwidth':component.type=='video-fullwidth','asset-video-fullscreen':component.type=='video-fullscreen'}">
+                                        <video ng-if="viewVideoUrlAndFilePrefix!=null"
+                                               ng-src="{{viewVideoUrlAndFilePrefix+asset.uniqueId}}"
+                                               draggable="false"
+                                               onloadedmetadata="this.muted = true"
+                                               autoplay="true" loop="loop" muted
+                                               ng-style="getAssetStyle(component,asset,'300')"
+                                               data-type="multimedia"></video>
+                                    </div>
+
+                                    <div class="editor-asset-text" ng-if="asset.type=='text'"
+                                         ng-style="{'background-color':editor.draft.node.bgColor}"
+                                         ng-class="{'asset-text-fullwidth':component.type=='text-fullwidth','asset-text-fullscreen':component.type=='text-fullscreen'}"
+                                         data-type="text">
+
+                                        <textarea class="editor-asset-text-content animate msd-elastic: \n;" type="text"
+                                                  data-type="component.asset.modify"
+                                                  placeholder="输入文字"
+                                                  data-ng-model="asset.content"
+                                                  readonly="readonly"
+                                                  ng-keyup="subStringForText('asset.text.content',$event)"
+                                                  ng-blur="modifyAssetText(sectionIndex,componentIndex,$index,$event)"
+                                                  ng-style="{'textAlign':asset.align,'fontSize':asset.fontSize+'px','font-family':asset.fontFamily,'fontWeight':asset.fontWeight,'fontStyle':asset.fontStyle,'color':asset.fontColor}"
+                                                  ng-class="{'top':asset.verticalAlign=='top','middle':asset.verticalAlign=='middle','bottom':asset.verticalAlign=='bottom'}"
+                                                  rows="1"></textarea>
+                                    </div>
+
+                                    <div class="editor-action-root"
+                                         ng-show="editor.draft.node.narrateTypeCode=='dialogue'">
+                                        <div class="editor-action-container" ng-repeat="action in component.actions"
+                                             ng-show="action!=null">
+                                        <span class="editor-action-playaudio" ng-if="action.type=='playaudio'"
+                                              data-action="modifyAction">对白按钮</span>
+                                        </div>
+
+                                        <span class="editor-add-action-playaudio-btn"
+                                              ng-if="(component.moPic==true||asset.type!='video')&&asset.type!='text'&&component.actions[0]==null"
+                                              data-action="insertAction">添加对白按钮</span>
+
+                                    </div>
+
+                                    <div class="editor-action-root" ng-repeat="action in component.actions"
+                                         ng-show="editor.draft.node.narrateTypeCode=='voiceover'&&action!=null">
+                                    <span class="effect-music-btn"
+                                          ng-click="launchEffectMusic(sectionIndex,componentIndex,'action.modify',$event)"></span>
+                                    </div>
+                                </div>
+
+                                <div class="asset-description-container">
+                                <textarea class="asset-description-content animate msd-elastic: \n;" type="text"
+                                          data-type="image.description.modify"
+                                          placeholder="请输入文字说明（可选）"
+                                          data-ng-model="asset.description.content"
+                                          ng-focus="setIndex($event,sectionIndex,componentIndex)"
+                                          ng-keyup="subStringForText('asset.description',$event)"
+                                          ng-blur="modifyAssetDescription(sectionIndex,componentIndex,$index,$event)"
+                                          rows="1"></textarea>
+                                </div>
+                            </div>
+
+                            <a class="editor-add-component-btn" data-length="{{section.components.length}}"
+                               ng-class="{'hide':section.components.length>=maxComponentsLength}"
+                               ng-click="showAddElementPopup(sectionIndex,componentIndex,$event)">
+                                +
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-click="createBlankSection(sectionIndex+1,'section.add',$event)" class="editor-create-section-btn"
+                 ng-class="{'hide':editor.draft.node.sections.length>=maxSectionsLength}">+
+            </div>
+        </div>
+
+        <!-- -->
+        <ul class="editor-add-component-toolbar clearfix" ng-show="editor.popupSwitches.addElementPopup"
+            ng-style="{'top':editor.popupLocation+'px'}">
+            <li class="upload-image-btn" style="background-image:url(/static/images/editor/pic.png)">
+                图片
+            </li>
+            <li class="upload-mopic-btn" style="background-image:url(/static/images/editor/mopic.png)">动图</li>
+            <!--<li id="createTextComponent" style="background-image:url(/static/images/editor/text.png)"
+                ng-click="addTextComponent()">
+                文本
+            </li>
+            &lt;!&ndash;<li style="background-image:url(../images/panorama.png)">全景图</li>&ndash;&gt;
+            <li id="uploadVideoBtn" style="background-image:url(/static/images/editor/editor_video.png)">视频</li>-->
+        </ul>
+
+        <div ng-click="switchComponentType($event)">
+            <ul class="editor-component-toolbar editor-image-toolbar clearfix" ng-show="editor.popupSwitches.imagePopup"
+                ng-class="{'voice-over':editor.draft.node.narrateTypeCode=='voiceover'&&!isVideoComponent()}"
+                ng-style="{'top':editor.popupLocation+'px'}">
+                <li data-action="fullscreenComponent"
+                    style="background-image:url(/static/images/editor/fullscreen.png)">
+                    全屏
+                </li>
+                <li data-action="fullwidthComponent" style="background-image:url(/static/images/editor/fullwidth.png)">
+                    等宽
+                </li>
+                <li id="uploadReplaceAssetImage" style="background-image:url(/static/images/editor/replace.png)"
+                    ng-show="isImageComponent()"
+                    class="replace-image-btn">替换
+                </li>
+                <li id="uploadReplaceMoPic" style="background-image:url(/static/images/editor/replace.png)"
+                    ng-show="isMoPicComponent()"
+                    class="replace-mopic-btn">替换
+                </li>
+                <li id="uploadReplaceVideo" style="background-image:url(/static/images/editor/replace.png)"
+                    ng-show="isVideoComponent()"
+                    class="replace-video-btn">替换
+                </li>
+                <li data-action="removeComponent" style="background-image:url(/static/images/editor/delete.png)">删除
+                </li>
+                <li data-action="addEffectMusic"
+                    ng-if="editor.draft.node.narrateTypeCode=='voiceover'&&!isVideoComponent()"
+                    style="background-image:url(/static/images/editor/add_effect_music.png)">音效
+                </li>
+            </ul>
+
+            <ul class=" editor-component-toolbar editor-text-toolbar clearfix"
+                ng-show="editor.popupSwitches.textPopup"
+                ng-style="{'top':editor.popupLocation+'px'}">
+                <li data-action="fullscreenComponent"
+                    style="background-image:url(/static/images/editor/fullscreen.png)">全屏
+                </li>
+                <li data-action="fullwidthComponent"
+                    style="background-image:url(/static/images/editor/fullwidth.png)">等宽
+                </li>
+                <li data-action="removeComponent" style="background-image:url(/static/images/editor/delete.png)">删除</li>
+                <!-- <li data-action="addEffectMusic"
+                     ng-if="editor.draft.node.narrateTypeCode=='voiceover'"
+                     style="background-image:url(/static/images/editor/add_effect_music.png)">音效
+                 </li>-->
+            </ul>
+        </div>
+    </div>
+</div>
+<!--main end-->
+
+<!--property start-->
+<div ng-controller="propertyController" class="editor-property-wrap">
+    <!--property controller-->
+    <div class="editor-font-property-container" ng-show="editor.popupSwitches.fontPropertyContainer"
+         ng-click="setAssetTextEditStatus()">
+        <div ng-click="showFontFamilyOrSizeSelectOptions($event)">
+            <div class="editor-font-family" style="background-image: url(/static/images/editor/font.png)">
+                <div class="editor-property-selector" data-action="selectedFontFamily"
+                     ng-bind="propertyOfFontFamily(editor.propertyAssetText)">宋体
+                </div>
+                <ul class="editor-font-family-items" ng-show="fontPropertyOfFamilyOps">
+                    <li ng-repeat="editorFontFamily in editorFontFamilys"
+                        ng-style="{'font-size':editorFontFamily}" ng-click="setFontFamily(editorFontFamily)"
+                        ng-bind="editorFontFamily">宋体
+                    </li>
+                </ul>
+            </div>
+
+            <div class="editor-font-size" style="background-image: url(/static/images/editor/wordsize.png)">
+                <div class="editor-property-selector" data-action="selectedFontSize"
+                     ng-bind="propertyOfFontSize(editor.propertyAssetText)">
+                    字号
+                </div>
+                <ul class="clearfix editor-font-size-items" ng-show="fontPropertyOfSizeOps">
+                    <li ng-repeat="editorFontSize in editorFontSizes" ng-style="{'font-size':editorFontSize.size+'px'}"
+                        ng-click="setFontSize(editorFontSize.size)"
+                        ng-bind="editorFontSize.name">
+                    </li>
+                </ul>
+            </div>
+
+            <div class="editor-font-align" ng-click="setFontAlign($event)">
+                <ul class="clearfix editor-font-horizontal-align"
+                    style="background-image: url(/static/images/editor/horizontal_align.png)">
+                    <li class="first" data-action="left" ng-class="{'on':editor.propertyAssetText.align=='left'}"></li>
+                    <li class="second" data-action="center"
+                        ng-class="{'on':editor.propertyAssetText.align=='center'}"></li>
+                    <li class="last" data-action="right" ng-class="{'on':editor.propertyAssetText.align=='right'}"></li>
+                </ul>
+
+                <ul class="clearfix editor-font-vertical-align"
+                    ng-class="{'off':editor.propertyComponentType=='text-fullwidth'}"
+                    style="background-image: url(/static/images/editor/vertical_align.png)">
+                    <li class="first" data-action="top"
+                        ng-class="{'on':editor.propertyAssetText.verticalAlign=='top'&&editor.propertyComponentType!='text-fullwidth'}"></li>
+                    <li class="second" data-action="middle"
+                        ng-class="{'on':editor.propertyAssetText.verticalAlign=='middle'&&editor.propertyComponentType!='text-fullwidth'}"></li>
+                    <li class="last" data-action="bottom"
+                        ng-class="{'on':editor.propertyAssetText.verticalAlign=='bottom'&&editor.propertyComponentType!='text-fullwidth'}"></li>
+                </ul>
+            </div>
+
+            <ul class="clearfix editor-font-color" style="background-image: url(/static/images/editor/text_color.png)"
+                ng-click="setFontColor($event)">
+                <li ng-repeat="editorFontColor in editorFontColors" data-color="{{editorFontColor}}"
+                    ng-class="{'on':editor.propertyAssetText.fontColor==editorFontColor}"><span
+                        ng-class="{'white':editorFontColor=='#ffffff'}"
+                        ng-style="{'background-color':editorFontColor}"></span></li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+<!--property end-->
+
+<!--loading start-->
+<div ng-controller="loadingController" ng-show="editor.loadingStatus"
+     class="editor-loading-wrap editor-modal-wrap">
+    <div class="editor-loading-shape">
+        <div class="ball-clip-rotate">
+            <div></div>
+        </div>
+        <span>上传中...</span>
+    </div>
+
+</div>
+<!--loading end-->
+
+<!--the record crop start-->
+<div ng-controller="audioRecordCropController"
+     ng-class="{'active':showAudioRecordAndCrop,'hide':!showAudioRecordAndCrop}"
+     class="editor-record-crop-wrap editor-modal-wrap">
+    <!-- record html-->
+    <div class="editor-record-container editor-modal-container" ng-show="showSelectAudio()">
+
+        <h2 class="limit-time editor-modal-title" ng-bind="limitTime()"></h2>
+        <span class="editor-close-modal-btn" ng-click="closeSelectAudio()"></span>
+
+        <ul class="editor-start-record">
+            <div class="editor-upload-audio-btn float-left" data-content="选择本地声音" ng-click="select()"
+                 data-after-content="(最大可上传5Mb的音频文件)"
+                 style="background-image: url(/static/images/editor/upload-the-audio.png)">
+            </div>
+
+            <button class="editor-record-btn linear-gradientEF float-left" data-content="开始录音"
+                    ng-click="startRecord()">
+            </button>
+
+            <button class="editor-skip-record-btn float-right" data-content="略过声音" ng-if="showSkipAudioBtn()"
+                    ng-click="skipAudio()">
+            </button>
+        </ul>
+    </div>
+
+    <div class="editor-recording-container editor-modal-container" ng-show="showRecording()">
+        <span class="reset-interface-btn" ng-click="cancelAudio()"></span>
+
+        <div class="recording" ng-show="recordNormal">
+            <span class="record-time" ng-bind="audioRecordProgress"></span>
+            <span class="record-frequency"
+                  ng-class="{'first':frequency=='first','second':frequency=='second','third':frequency=='third','four':frequency=='four','five':frequency=='five'}"></span>
+
+            <p>录音中...</p>
+        </div>
+
+        <div class="recording-warning" ng-show="recordWarning">
+            <span class="record-warn-time" ng-bind="audioRecordProgress"></span>
+            <span class="record-frequency"
+                  ng-class="{'first':frequency=='first','second':frequency=='second','third':frequency=='third','four':frequency=='four','five':frequency=='five'}"></span>
+
+            <p>结束录音...</p>
+        </div>
+
+        <div class="editor-operation-buttons">
+            <button class="editor-button middle-size-button single-color-button" ng-click="cancelAudio()">
+                取消录音
+            </button>
+            <button class="editor-button middle-size-button"
+                    ng-disabled="audioRecordProgress<getTooLowPoint()"
+                    ng-class="{'linear-gradient-button':audioRecordProgress>=getTooLowPoint(),'disabled-button':audioRecordProgress<getTooLowPoint()}"
+                    ng-click="finishRecord()">
+                完成录音
+            </button>
+        </div>
+    </div>
+
+    <div class="editor-audio-handle-container editor-modal-container" ng-show="showEditAudio()">
+
+        <h2 class="editor-modal-title">编辑录音</h2>
+        <span class="editor-close-modal-btn" ng-click="closeEditAudio()"></span>
+
+
+        <div class="editor-audio-crop-container" style="background-color: rgba(213,213,213,.5);height: 256px;">
+            <div id="audioCropContainer"
+                 style="width:1100px; height:256px; position: relative;"></div>
+        </div>
+
+        <div class="editor-audio-regulate-volume">
+            <div class="editor-audio-controls float-left">
+                <span class="editor-audio-play" ng-show="!isPlay()" ng-click="playAudio()">播放</span>
+                <span class="editor-audio-pause" ng-show="isPlay();" ng-click="stopAudio()">停止</span>
+            </div>
+            <div class="editor-audio-regulate float-left">
+                <span class="float-left">音量</span>
+
+                <div class="float-left editor-volume-bar" id="audioVolumeContainer"></div>
+            </div>
+        </div>
+        <div class="editor-operate-audio clearfix">
+            <button style="background-image:url(/static/images/editor/replace.png)" class="float-left"
+                    ng-click="replaceAudio()">替换
+            </button>
+            <button style="background-image:url(/static/images/editor/delete.png)" class="float-right"
+                    ng-click="deleteAudio()">删除
+            </button>
+        </div>
+
+        <div class="editor-music-controls" ng-if="editor.node.bgMusics.length>0">
+            <button class="editor-music-play float-left" ng-if="!showBgMusicControlBtn()"
+                    ng-click="playBgMusic()">播放
+            </button>
+            <button class="editor-music-pause float-left" ng-if="showBgMusicControlBtn()"
+                    ng-click="stopBgMusic()">停止
+            </button>
+
+            <img ng-if="editor.node.bgMusics[0].cover!=null&&editor.node.bgMusics[0].cover.uniqueId!=null"
+                 ng-src="{{viewDefaultUrlPrefix+editor.node.bgMusics[0].cover.uniqueId}}?imageView2/1/w/40/h/40/ignore-error/1"
+                 alt=""
+                 class="editor-music-thumbnail exsit float-left"/>
+            <img ng-if="editor.node.bgMusics[0].cover.uniqueId==null"
+                 src="/static/images/editor/self_bg_music_default_cover.jpg" class="editor-music-thumbnail float-left"
+                 alt=""/>
+
+            <div class="editor-music-play-process float-left">
+
+                <p class="editor-music-name" ng-bind="editor.node.bgMusics[0].audio.name"></p>
+
+                <p class="editor-audio-duration-bar" ng-click="fixedPointPlay($event)"></p>
+
+                <p class="editor-audio-play-process-bar" ng-style="{'width':bgMusicPlayProcess+'%'}"></p>
+            </div>
+
+        </div>
+
+        <div class="editor-operation-buttons">
+            <button class="editor-button small-size-button"
+                    ng-class="{'single-color-button':buttonIsDisable(),'disabled-button':!buttonIsDisable()}"
+                    ng-click="closeEditAudio()">取消
+            </button>
+            <button class="editor-button small-size-button"
+                    ng-class="{'linear-gradient-button':buttonIsDisable(),'disabled-button':!buttonIsDisable()}"
+                    ng-click="saveAudio()">完成
+            </button>
+        </div>
+    </div>
+</div>
+<!--the record crop end-->
+
+<!--image upload start-->
+<div ng-controller="imageUploadController" ng-class="{'active':showImageUploadPanel,'hide':!showImageUploadPanel}"
+     id="editorImageUploadWrap"
+     class="editor-image-upload-wrap editor-modal-wrap">
+    <!--image upload controller-->
+    <div class="editor-image-upload-container">
+        <span class="editor-close-modal-btn" ng-click="closeUploadImagePanel()"></span>
+
+        <div class="editor-image-upload-cell clearfix">
+            <div class="editor-image-cells" id="uploadImagePanel">
+                <div ng-repeat="(imageFileIndex,imageFile) in getUploadImageThumbnail()"
+                     class="image-thumbnail">
+                    <div>
+                        <img ng-src="{{imageFile.thumbUrl}}" ng-mousedown="dragImageStart($event)"
+                             ng-mouseup="dragImageEnd(imageFileIndex)"
+                             ng-if="!imageFile.error&&editor.currentOpsCode==='component.images.add'"
+                             alt=""/>
+
+                        <div ng-if="editor.currentOpsCode==='component.mopics.add'">
+                            <img ng-src="{{imageFile.thumbUrl}}" ng-mousedown="dragImageStart($event)"
+                                 ng-mouseup="dragImageEnd(imageFileIndex)"
+                                 ng-if="!imageFile.error&&imageFile.thumbUrl!==undefined"
+                                 alt=""/>
+
+                            <img ng-if="!imageFile.error&&imageFile.thumbUrl===undefined&&imageFile.origin!==undefined"
+                                 ng-src="{{imageFile.origin}}?vframe/jpg/offset/0/"
+                                 alt=""/>
+
+                            <img src="/static/images/editor/video_default.jpg"
+                                 ng-if="!imageFile.error&&imageFile.thumbUrl===undefined&&imageFile.origin===undefined"
+                                 alt=""/>
+                        </div>
+
+
+                        <img src="/static/images/editor/image_upload_error.png" ng-mousedown="dragImageStart($event)"
+                             ng-mouseup="dragImageEnd(imageFileIndex)"
+                             ng-if="imageFile.error"
+                             alt=""/>
+
+                        <div class="image-upload-process" ng-if="uploadLoadingStatus()"
+                             ng-style="{'height':imageFile.percent+'%'}">
+                        </div>
+                        <span class="delete-btn"
+                              ng-click="deleteImagePanelFile(imageFileIndex)"
+                              data-index="{{imageFileIndex}}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="editor-image-empty-cells">
+                <div ng-repeat="emptyFile in emptyPanelFiles">
+
+                </div>
+            </div>
+
+            <div class="editor-image-upload-index">
+                <div ng-repeat="imageFile in getUploadImageThumbnail()">
+                    <div class="order-number">
+                        <span ng-bind="$index+1"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div ng-show="showUploadImageBtn()">
+                <div class="upload-image-btn" ng-show="getCurrentUserOpsCode()==='component.images.add'"></div>
+                <div class="upload-mopic-btn" ng-show="getCurrentUserOpsCode()==='component.mopics.add'"></div>
+            </div>
+        </div>
+
+        <p class="limit-tip-text" id="limitImageTipText">最多上传9张图片，其余图片请重新上传</p>
+
+        <p class="limit-tip-text" id="limitMopicTipText">最多上传9张动图，其余图片请重新上传</p>
+
+        <p class="upload-error-tip"
+           ng-if="getUploadErrorFiles().length>0&&getCurrentUserOpsCode()==='component.images.add'">
+            {{getUploadErrorFiles().length}}个文件上传失败，文件过大或格式出错，文件最大限制为10Mb
+        </p>
+
+        <p class="upload-error-tip"
+           ng-if="getUploadErrorFiles().length>0&&getCurrentUserOpsCode()==='component.mopics.add'">
+            {{getUploadErrorFiles().length}}个文件上传失败，文件过大或格式出错，文件最大限制为2Mb
+        </p>
+
+        <div class="editor-operation-buttons">
+            <button class="editor-button small-size-button"
+                    ng-class="{'single-color-button':!uploadLoadingStatus(),'disabled-button':uploadLoadingStatus()}"
+                    ng-click="closeUploadImagePanel()"
+                    ng-disabled="uploadLoadingStatus();">取消
+            </button>
+            <button class="editor-button small-size-button"
+                    ng-class="{'linear-gradient-button':!uploadLoadingStatus(),'disabled-button':uploadLoadingStatus()}"
+                    ng-click="saveUploadImagePanel()"
+                    ng-disabled="uploadLoadingStatus();">确定
+            </button>
+        </div>
+    </div>
+</div>
+<!--image upload end-->
+
+<!--theme selector start-->
+<div ng-controller="themeSelectorController" ng-class="{'active':showThemeSelector,'hide':!showThemeSelector}"
+     class="editor-theme-wrap editor-modal-wrap">
+    <div class="editor-theme-container editor-modal-container">
+
+        <h2 class="editor-modal-title">主题</h2>
+        <span class="editor-close-modal-btn" ng-click="cancelTheme()"></span>
+
+        <ul class="editor-theme-items clearfix ">
+            <li ng-repeat="mobooTheme in mobooThems"
+                ng-class="{'active':mobooTheme.code==currentMobooTheme.code}">
+                <div class="editor-theme-item">
+                    <div class="editor-theme-cover" ng-click="selectMobooTheme(mobooTheme);">
+                        <div class="editor-theme-bg-image"
+                             ng-style="{'background-image':'url({{mobooTheme.webCover.origin}}?imageView2/1/w/180/h/320)'}"></div>
+                    </div>
+                    <h4 class="editor-theme-title" ng-bind="mobooTheme.name"
+                        ng-click="selectMobooTheme(mobooTheme);"></h4>
+
+                    <p class="editor-theme-desc" ng-bind="mobooTheme.desc"
+                       ng-click="selectMobooTheme(mobooTheme);"></p>
+
+                    <div class="editor-theme-mark">
+                        <strong ng-bind="mobooTheme.optionsName"
+                                ng-style="{'color':mobooTheme.defaultThemeOption.fontColor}"
+                                class="float-left"></strong>
+
+                        <div class="circle-container">
+                            <span ng-repeat="themeOption in mobooTheme.themeOptions" class="theme-bgc-circle"
+                                  ng-click="selectThemeOption(mobooTheme,themeOption);"
+                                  ng-class="{'active':isSelectOption(mobooTheme,themeOption)}">
+                                <span ng-style="{'background-color':themeOption.optionColor}"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+
+        <div class="editor-operation-buttons">
+            <button class="editor-button small-size-button single-color-button"
+                    ng-click="cancelTheme();">取消
+            </button>
+            <button class="editor-button small-size-button linear-gradient-button"
+                    ng-click="confirmTheme();">确定
+            </button>
+        </div>
+    </div>
+
+</div>
+<!--theme selector end-->
+
+<!--bgm selector start-->
+<div ng-controller="bgmSelectorController" ng-class="{'active':showBgmSelector,'hide':!showBgmSelector}"
+     class="editor-bgm-music-wrap editor-modal-wrap">
+    <!--bgm selector-->
+    <div class="editor-music-library editor-modal-container" ng-click="cancelSelectBgMusic()">
+        <h2 class="editor-modal-title">Moboo乐库</h2>
+        <span class="editor-close-modal-btn" ng-click="closeBgMusic()"></span>
+
+        <div class="editor-music-tags clearfix">
+            <ul id="tab" class="editor-music-items float-left">
+                <li ng-repeat="tag in tags" ng-click="searchBgMusics(tag.tagId);"
+                    ng-bind="tag.title" ng-class="{'on':selectedTag.tagId==tag.tagId}"></li>
+                <li ng-click="searchSelfBgMusics(0)" ng-class="{'on':selectedTag.tagId==0}">我的乐库</li>
+            </ul>
+        </div>
+
+        <div class="editor-music-list" when-scroll-end="nextRangeRows(rangeRows.range)">
+            <ul class=" clearfix">
+                <li ng-click="previewLibrary(null)"
+                    ng-class="{'active':libraryItem==null}">
+                    <div class="editor-default-music">
+
+                    </div>
+
+                    <p class="music-name">无音乐</p>
+                </li>
+
+                <li ng-if="selectedTag.tagId==0">
+                    <div class="upload-self-audio-btn" ng-show="!userLoginStatus&&showSelfBgMusicUploadBtn()"
+                         ng-init="bindAudioFileUploader()">
+
+                    </div>
+                    <div class="sign-on-btn" ng-show="userLoginStatus" ng-click="signonProcess()">
+
+                    </div>
+
+                    <div class="sign-on-btn" ng-show="!userLoginStatus&&!showSelfBgMusicUploadBtn()"
+                         ng-click="beyondLimit()">
+
+                    </div>
+
+                    <p class="music-name">从本地上传音乐</p>
+
+                    <p class="point-text">(最大可上传5Mb的音频文件)</p>
+                </li>
+
+                <li ng-repeat="item in rangeRows.rows"
+                    ng-class="{'active':item.genericMedias[0].fileId==libraryItem.genericMedias[0].fileId}">
+
+                    <div class="editor-music-cover" ng-click="previewLibrary(item);">
+                        <img ng-src="{{item.covers[0].origin}}?imageView2/1/w/110/h/110/ignore-error/1"
+                             class="exist-cover"
+                             ng-if="item.covers[0]!=null&&item.covers[0].origin!=null" alt=""/>
+                        <img src="/static/images/editor/self_bg_music_default_cover.jpg"
+                             ng-if="item.covers[0]==null&&item.covers[0].origin==null" alt=""/>
+                    </div>
+
+                    <p ng-bind="filterText(item.title)" class="music-name"
+                       ng-show="!musicNameIsModify||item.genericMedias[0].fileId!=curSelectSelfMusic.genericMedias[0].fileId"></p>
+
+                    <div class="modify-music-name"
+                         ng-show="musicNameIsModify&&item.genericMedias[0].fileId==curSelectSelfMusic.genericMedias[0].fileId">
+                        <textarea id="musicName{{$index}}" rows="1" type="text"
+                                  class="music-name animate msd-elastic: \n;"
+                                  data-ng-model="item.title"
+                                  readonly="readonly"
+                                  ng-keyup="subStringForBgmMusicTitle(item.title,$event)"
+                                  ng-blur="saveSelfMusicOfModify($index)"></textarea>
+                    </div>
+
+                    <div class="editor-music-operate" ng-show="selectedTag.tagId==0">
+                        <span class="ellipsis"
+                              ng-if="item.genericMedias[0].fileId!=curSelectSelfMusic.genericMedias[0].fileId"
+                              ng-click="selectBgMusic($event,item)"></span>
+
+                        <div class="option-list"
+                             ng-show="item.genericMedias[0].fileId==curSelectSelfMusic.genericMedias[0].fileId"
+                             ng-click="operateSelfMusic($event,$index)">
+                            <span data-action="modifySelfMusic">编辑</span>
+                            <span data-action="delete">删除</span>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="editor-music-controls-container">
+            <div class="editor-music-controls" ng-if="libraryItem!=null">
+                <button class="editor-music-play float-left" ng-if="!showAudioControl()"
+                        ng-click="play(libraryItem.genericMedias[0].extStr01)">播放
+                </button>
+                <button class="editor-music-pause float-left" ng-if="showAudioControl()"
+                        ng-click="pause()">停止
+                </button>
+
+                <img ng-if="libraryItem.covers!=null&&libraryItem.covers[0].fileId!=null"
+                     ng-src="{{viewDefaultUrlPrefix+libraryItem.covers[0].fileId}}?imageView2/1/w/40/h/40/ignore-error/1"
+                     alt=""
+                     class="editor-music-thumbnail exsit float-left"/>
+
+                <img ng-if="libraryItem.covers[0].fileId==null"
+                     src="/static/images/editor/self_bg_music_default_cover.jpg" alt=""
+                     class="editor-music-thumbnail float-left"/>
+
+                <div class="editor-music-play-process float-left">
+
+                    <p class="editor-music-name" ng-bind="libraryItem.title"></p>
+
+                    <span ng-bind="libraryItem.genericMedias[0].extStr01 | number:2" style="display:none;"></span>
+
+                    <p class="editor-audio-duration-bar" ng-click="fixedPointPlay($event)"></p>
+
+                    <p class="editor-audio-play-process-bar"
+                       ng-style="{'width':bgMusic.playProcess+'%'}"></p>
+                </div>
+
+                <a class="audio-volume-tag float-left editor-button middle-size-button single-color-button"
+                   ng-click="showVolumeBar()">调节音量
+                </a>
+            </div>
+
+            <div class="audio-volume-container" ng-show="volumeBarVisable">
+                <p>注意：改变音乐的音量可能会影响录音大小的参考标准降低阅读体验</p>
+
+                <div class="clearfix">
+                    <span class="float-left">调节音量</span>
+
+                    <div class="float-left editor-volume-bar" id="bgMusicRangeContainer">
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="editor-operation-buttons">
+                <button class="editor-button small-size-button single-color-button"
+                        ng-click="closeBgMusic()">取消
+                </button>
+                <button class="editor-button small-size-button linear-gradient-button"
+                        ng-click="confirmBgMusic();">
+                    确定
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--bgm selector end-->
+<div ng-controller="evnMusicSelectorController" ng-class="{'active':showEvnMusicSelector,'hide':!showEvnMusicSelector}"
+     class="editor-evn-music-wrap editor-modal-wrap">
+    <div class="editor-evn-music-container editor-modal-container" ng-click="cancelSelectEffectMusic()">
+        <h2 class="editor-modal-title">环境音库</h2>
+        <span class="editor-close-modal-btn" ng-click="closeEvnMusic()"></span>
+
+        <div class="evn-music-item-title">
+            <span class="public" ng-class="{'active':curSelectMusic.code=='public'}"
+                  ng-click="switchEvnMusicType('public')">Moboo环境音</span>
+            <span ng-click="switchEvnMusicType('self')"
+                  ng-class="{'active':curSelectMusic.code=='self'}">我的环境音</span>
+        </div>
+
+        <div class="evn-music-item-content" when-scroll-end="nextRangeRows(rangeRows.range)">
+            <ul>
+                <li ng-click="previewLibrary(null)"
+                    ng-if="curSelectMusic.code=='public'"
+                    ng-class="{'active':libraryItem==null}">
+                    <p class="music-name">无环境音</p>
+                    <img src="/static/images/editor/sound-effect.png" class="effect-not-exist-icon" alt=""/>
+                </li>
+                <li ng-if="curSelectMusic.code=='self'">
+                    <div class="upload-evn-audio-btn" ng-init="bindAudioFileUploader()"
+                         ng-show="!userLoginStatus&&showSelfEvnMusicUploadBtn()"> +从本地上传环境音
+                    </div>
+                    <div class="sign-on-btn" ng-show="userLoginStatus" ng-click="signonProcess()">
+                        +从本地上传环境音
+                    </div>
+
+                    <div class="sign-on-btn" ng-show="!userLoginStatus&&!showSelfEvnMusicUploadBtn()"
+                         ng-click="beyondLimit()">
+                        +从本地上传环境音
+                    </div>
+                    <div class="float-right point-text">(最大可上传256kb的音频文件)</div>
+                </li>
+                <li ng-repeat="item in rangeRows.rows" ng-click="previewLibrary(item)"
+                    ng-class="{'active':item.genericMedias[0].fileId==libraryItem.genericMedias[0].fileId}">
+                    <p ng-bind="item.title" class="music-name" ng-click="previewLibrary(item)"
+                       ng-if="curSelectMusic.code=='public'"></p>
+                    <input class="music-name" id="evnMusicName{{$index}}" type="text" readonly="readonly"
+                           ng-model="item.title"
+                           ng-click="previewLibrary(item)"
+                           ng-keyup="subStringForEnvMusicTitle(item.title,$event)"
+                           ng-blur="saveSelfMusicOfModify($index)"
+                           ng-if="curSelectMusic.code=='self'"/>
+
+                    <div class="editor-music-operate" ng-if="curSelectMusic.code=='self'">
+                        <span class="ellipsis"
+                              ng-if="item.genericMedias[0].fileId!=curSelectMusic.item.genericMedias[0].fileId"
+                              ng-click="selectSelfEffectMusic($event,item)"></span>
+
+                        <div class="option-list"
+                             ng-show="item.genericMedias[0].fileId==curSelectMusic.item.genericMedias[0].fileId"
+                             ng-click="operateSelfEvnMusic($event,$index)">
+                            <span data-action="modifySelfMusic">编辑</span>
+                            <span data-action="delete">删除</span>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="music-control-root">
+            <div class="evn-music-control-container" ng-show="libraryItem!=null&&libraryItem!=undefined">
+                <button class="editor-evn-music-play float-left" ng-if="!showAudioControlBtn()"
+                        ng-click="play()">播放
+                </button>
+                <button class="editor-evn-music-pause float-left" ng-if="showAudioControlBtn()"
+                        ng-click="pause()">停止
+                </button>
+
+                <div class="current-evn-music">
+                    <span class="title">已选:</span>
+                    <span class="content" ng-bind="libraryItem.title">教堂钟声</span>
+                </div>
+
+                <div class="volume-control-container float-left">
+                    <span class="float-left">音量</span>
+
+                    <div class="float-right editor-volume-bar" id="evnMusicRangeContainer">
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="editor-operation-buttons">
+                <button class="editor-button small-size-button single-color-button" ng-click="closeEvnMusic()">取消
+                </button>
+                <button class="editor-button small-size-button linear-gradient-button" ng-click="saveEvnMusic()">
+                    确定
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div ng-controller="effectMusicSelectorController"
+     ng-class="{'active':showEffectMusicSelector,'hide':!showEffectMusicSelector}"
+     class="editor-effect-music-wrap editor-modal-wrap">
+    <div class="editor-effect-music-container editor-modal-container" ng-click="cancelSelectEffectMusic()">
+        <h2 class="editor-modal-title">音效库</h2>
+        <span class="editor-close-modal-btn" ng-click="closeEffectMusic()"></span>
+
+        <div class="effect-music-item-title">
+            <span class="public" ng-class="{'active':curSelectMusic.code=='public'}"
+                  ng-click="switchEffectMusicType('public')">Moboo音效</span>
+            <span ng-click="switchEffectMusicType('self')"
+                  ng-class="{'active':curSelectMusic.code=='self'}">我的音效</span>
+        </div>
+
+        <div class="effect-music-item-content" when-scroll-end="nextRangeRows(rangeRows.range)">
+            <ul>
+                <li ng-click="previewLibrary(null)"
+                    ng-if="curSelectMusic.code=='public'"
+                    ng-class="{'active':libraryItem==null}">
+                    <p class="music-name">无音效</p>
+                    <img src="/static/images/editor/sound-effect.png" class="effect-not-exist-icon" alt=""/>
+                </li>
+                <li ng-if="curSelectMusic.code=='self'">
+                    <div class="upload-effect-audio-btn" ng-init="bindAudioFileUploader()"
+                         ng-show="!userLoginStatus&&showSelfEffectMusicUploadBtn()"> +从本地上传音效
+                    </div>
+                    <div class="sign-on-btn" ng-show="userLoginStatus" ng-click="signonProcess()">
+                        +从本地上传音效
+                    </div>
+
+                    <div class="sign-on-btn" ng-show="!userLoginStatus&&!showSelfEffectMusicUploadBtn()"
+                         ng-click="beyondLimit()">
+                        +从本地上传音效
+                    </div>
+
+                    <div class="float-right point-text">(最大可上传256kb的音频文件)</div>
+                </li>
+                <li ng-repeat="item in rangeRows.rows"
+                    ng-class="{'active':item.genericMedias[0].fileId==libraryItem.genericMedias[0].fileId}">
+                    <p ng-bind="item.title" class="music-name" ng-click="previewLibrary(item)"
+                       ng-if="curSelectMusic.code=='public'"></p>
+                    <input class="music-name" id="effectMusicName{{$index}}" type="text" readonly="readonly"
+                           ng-model="item.title"
+                           ng-click="previewLibrary(item)"
+                           ng-keyup="subStringForEffectMusicTitle(item.title,$event)"
+                           ng-blur="saveSelfMusicOfModify($index)"
+                           ng-if="curSelectMusic.code=='self'"/>
+
+                    <div class="editor-music-operate" ng-if="curSelectMusic.code=='self'">
+                        <span class="ellipsis"
+                              ng-if="item.genericMedias[0].fileId!=curSelectMusic.item.genericMedias[0].fileId"
+                              ng-click="selectSelfEffectMusic($event,item)"></span>
+
+                        <div class="option-list"
+                             ng-show="item.genericMedias[0].fileId==curSelectMusic.item.genericMedias[0].fileId"
+                             ng-click="operateSelfEffectMusic($event,$index)">
+                            <span data-action="modifySelfMusic">编辑</span>
+                            <span data-action="delete">删除</span>
+                        </div>
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="music-control-root">
+            <div class="effect-music-control-container" ng-show="libraryItem!=null&&libraryItem!=undefined">
+                <button class="editor-effect-music-play float-left" ng-if="!showAudioControlBtn()"
+                        ng-click="play()">播放
+                </button>
+                <button class="editor-effect-music-pause float-left" ng-if="showAudioControlBtn()"
+                        ng-click="pause()">停止
+                </button>
+
+                <div class="current-effect-music">
+                    <span class="title">已选:</span>
+                    <span class="content" ng-bind="libraryItem.title">教堂钟声</span>
+                </div>
+
+                <div class="volume-control-container float-left">
+                    <span class="float-left">音量</span>
+
+                    <div class="float-right editor-volume-bar" id="effectMusicRangeContainer">
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="editor-operation-buttons">
+                <button class="editor-button small-size-button single-color-button" ng-click="closeEffectMusic()">取消
+                </button>
+                <button class="editor-button small-size-button linear-gradient-button" ng-click="saveEffectMusic()">
+                    确定
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div ng-controller="uploadErrorController" class="upload-error-container editor-modal-wrap"
+     ng-class="{'active':showUploadError,'hide':!showUploadError}">
+    <div class="upload-error">
+        <p class="limit-tip-text" ng-show="(getUploadErrorFiles().length+getUploadSuccessFiles().length)>=9">
+            最多可同时上传9个文件，其他文件请重新上传</p>
+
+        <div class="upload-success-file-info" ng-if="getUploadSuccessFiles().length">
+            <span>上传成功</span>
+
+            <div ng-repeat="uploadFile in getUploadSuccessFiles()">
+                <span ng-bind="$index+1+'.'"></span>
+                <span ng-bind="uploadFile.title"></span>
+                <span ng-bind="uploadFile.text"></span>
+            </div>
+        </div>
+
+        <div class="upload-error-file-info" ng-if="getUploadErrorFiles().length>0">
+            <span>上传失败</span>
+
+            <div ng-repeat="uploadFile in getUploadErrorFiles()">
+                <span ng-bind="$index+1+'.'"></span>
+                <span ng-bind="uploadFile.title"></span>
+                <span ng-bind="uploadFile.text"></span>
+            </div>
+
+        </div>
+
+        <button class="editor-button small-size-button linear-gradient-button" ng-click="hideUploadError()">
+            确定
+        </button>
+    </div>
+</div>
+
+<!--moboo preview start-->
+<div ng-controller="mobooPreviewController" ng-class="{'active':show,'hide':!show}"
+     class="editor-preview-wrap editor-modal-wrap">
+    <!--moboo preview controller-->
+    <div class="editor-preview">
+        <span class="editor-close-modal-btn" data-action="preview-modal-hidden" ng-click="closePreview();"></span>
+
+        <div class="moboo-displayer-container">
+
+            <div class="up-down-btn">
+                <button style="background-image: url(/static/images/editor/preview_up.png)" id="upBtn">向上</button>
+                <button style="background-image: url(/static/images/editor/preview_down.png)" id="downBtn">向下
+                </button>
+            </div>
+
+            <!--the episode content-->
+            <div class="moboo-container" id="moboo-container"></div>
+            <div class="phone"></div>
+
+
+            <ul class="section-lists-container">
+                <li ng-repeat="item in sectionLists"
+                    ng-click="playAppointedSection($index+1)"
+                    ng-class="{'empty':!item.hasComponent,'active':currentActiveSection===($index+1)}">
+                    章节
+                    {{$index>=9?($index+1):'0'+($index+1)}}
+                </li>
+            </ul>
+        </div>
+
+        <div class="back-to-edit-page" ng-click="closePreview();"></div>
+
+    </div>
+
+</div>
+<!--moboo preview end-->
+<div id="uploadImageDummyBtn"></div>
+<div ng-controller="mobooPublishController" ng-class="{'active':show,'hide':!show}"
+     class="editor-publish-wrap editor-modal-wrap">
+    <div class="editor-publish">
+        <span class="editor-close-modal-btn" ng-click="cancelPublish()"></span>
+
+        <div ng-show="circleList!==null&&circleList!==undefined&&circleList.length>0">
+            <h2>选择CLUB</h2>
+
+            <ul class="club-list" id="clubList">
+                <li class="club-item" ng-repeat="circleItem in circleList"
+                    data-number="{{circleItem.circleNo}}"
+                    ng-click="select(circleItem)">
+                    <div class="club-title"
+                         ng-class="{'valid-club':circleItem.allowPublishMoboo,'invalid-club':!circleItem.allowPublishMoboo,'active':circleItem.circleNo==currentCircleItem.circleNo}"
+                         ng-bind="circleItem.title"></div>
+
+                    <div class="invalid-desc" ng-show="!circleItem.allowPublishMoboo">
+                        (暂未开放投稿权限)
+                    </div>
+                </li>
+            </ul>
+
+            <div class="editor-operation-buttons">
+                <button class="editor-button small-size-button single-color-button" ng-click="cancelPublish()">取消
+                </button>
+                <button class="editor-button small-size-button" ng-click="publishDraft()"
+                        ng-class="{'linear-gradient-button':currentCircleItem!==null&&currentCircleItem.circleNo!==undefined,'disabled-button':currentCircleItem===null}"
+                        ng-disabled="currentCircleItem===null">确定
+                </button>
+            </div>
+        </div>
+
+        <div ng-show="circleList===null||circleList===undefined||circleList.length===0"
+             class="empty-club-tip-container">
+            <p>您尚未关注任何CLUB<br/>请关注后进行发布。</p>
+
+            <button class="editor-button small-size-button linear-gradient-button" ng-click="cancelPublish()">确定
+            </button>
+        </div>
+    </div>
+</div>
+
+<!--the start scripts-->
+<script type="text/javascript">
+    //todo. the init params
+    var editorInitParam = {
+        //the init draft no and the selected narrate type code (optional)
+        draftNo: "2017073120560108",
+        narrateTypeCode: "voiceover",
+        circles: null,
+        ///////////////////////////////////
+        //upload setting for creative in bucket creative
+        imageUploadSetting: null,
+        audioUploadSetting: null,
+        videoUploadSetting: null,
+        //upload setting for cover in bucket default
+        coverImageUploadSetting: null,
+        //
+        libAudioUploadSetting: null,
+        //
+        assetDisplayDomainUrl: "https://devm.moboo.ly",
+        //
+        userNo: null,
+        //for connect to server.
+        apiDomainPrefix: "https://localwww.moboo.ly",
+        ///////////////////////////////////
+        //displayer config
+        mobooDisplayerVersion: "1.1.1.2253",
+        noviceGuideCookieDomain: ".moboo.ly",
+        //
+        defaultBucketOriginalUrlPrefix: "https://devassetdef.moboo.ly/",
+        mobooBucketOriginalUrlPrefix: "https://devassetmoboo.moboo.ly/",
+        libraryBucketOriginalUrlPrefix: "https://devassetlib.moboo.ly/",
+        creativeBucketOriginalUrlPrefix: "https://devassetcreative.moboo.ly/",
+        ///////////////////////////////////
+        //以下配置可选
+        ajaxApiUrlGetDraftInitData: "/ajax/creative/draft/get/free",
+        ajaxApiUrlQueryAllThemes: null,
+        ajaxApiUrlQueryBgmTags: null,
+        ajaxApiUrlQueryEffectMusicTags: null,
+        ajaxApiUrlQueryEnvMusicTags: null,
+        ajaxApiUrlQueryCircles: null,
+        ajaxApiUrlSearchLibraries: null,
+        ajaxApiUrlSearchSelfLibraries: null,
+        ajaxApiUrlCreateSelfLibrary: null,
+        ajaxApiUrlModifySelfLibrary: null,
+        ajaxApiUrlRemoveSelfLibrary: null,
+        ajaxApiUrlSaveDraft: null,
+        ajaxApiUrlSaveDraftSection: null,
+        ajaxApiUrlSaveDraftRoot: null,
+        ajaxApiUrlGetUploadSetting: null,
+        ajaxApiUrPublishDraft: null,
+        apiUrlPublishDraftPrefix: null,
+        apiUrlUserArticleList: null,
+
+        ajaxApiUrlNoviceGuideImplement: null,
+        ajaxApiUrlCropResource: null,
+        ajaxApiUrlGetPretreatmentFopStatus: null,
+        ajaxApiUrlGenerateAudioMultiVolumeFiles: null,
+        synDb: false
+    };
+
+
+</script>
+<!--//editor related javascript files-->
+<!--此处以下的js将来需要打成一个min文件：moboo.editor.srcn.js-->
+<script type="text/javascript" src="../src/editor/moboo.draft.functions.js"></script>
+<script type="text/javascript" src="../src/editor/moboo.editor.js"></script>
+<script type="text/javascript" src="../src/editor/moboo.draft.constants.js"></script>
+<script type="text/javascript" src="../src/editor/moboo.draft.js"></script>
+<script type="text/javascript" src="../src/editor/moboo.draft.node.js"></script>
+<!--此处以下的js将来需要打成一个min文件：moboo.editor.angular.srcn.js-->
+<script type="text/javascript" src="../src/editor/angularjs.module.js"></script>
+<script type="text/javascript" src="../src/editor/angularjs.service.js"></script>
+<script type="text/javascript" src="../src/editor/angularjs.directive.js"></script>
+<script type="text/javascript" src="../src/editor/angularjs.controller.layout.js"></script>
+<script type="text/javascript" src="../src/editor/angularjs.controller.modals.js"></script>
+</body>
+</html>

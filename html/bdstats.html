@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" style="width: 100%;height: 100%">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <!--//-->
+    <title>Baidu Stats - Moboo Lib</title>
+    <!--//css-->
+    <!--//scripts-->
+    <script type="text/javascript" src="../src/bdstats/moboolib.bdstats.js"></script>
+</head>
+<body>
+<button onclick="clickTest()">Click Test</button>
+<script type="text/javascript">
+    var bdStats = new MobooLib.BDStats("0fdcc1bee4fda19e0a2e34b863619067");
+
+    function clickTest() {
+        bdStats.statsBtnClick("aaaa", "011", "test");
+    }
+</script>
+</body>
+</html>

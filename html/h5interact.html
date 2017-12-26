@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" style="width: 100%;height: 100%">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <!--//-->
+    <title>Baidu Stats - Moboo Lib</title>
+    <!--//css-->
+    <!--//scripts-->
+    <script type="text/javascript" src="../src/h5interact/moboolib.h5interact.js"></script>
+</head>
+<body>
+<button onclick="testViewPage1()">View Page Fun 1</button>
+<button onclick="testViewPage2()">View Page Fun 2</button>
+<script type="text/javascript">
+    var h5Interact = new MobooLib.H5Interact();
+
+    function testViewPage1() {
+        h5Interact.viewPageStats("article", "1234556", "123", true);
+    }
+
+    function testViewPage2() {
+        h5Interact.viewPageStats("profile", "1234556", null, false);
+    }
+</script>
+</body>
+</html>

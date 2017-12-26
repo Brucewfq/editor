@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <!--//-->
+    <title>Audio Crop - Moboo Lib</title>
+    <!--//css-->
+</head>
+<body onload="starter();">
+<div id="recordProgress">Click the start button to recording.</div>
+<button onclick="startRecord()">Start</button>
+<button onclick="stopRecord()">Stop</button>
+<button onclick="getResult()">Play</button>
+<div>
+    <audio id="audioPlayer" controls></audio>
+</div>
+<!--the scripts-->
+<script type="text/javascript" src="../src/recorder/moboolib.audiorecord.js"></script>
+<script type="text/javascript">
+    var mobooAudioRecord = null;
+    var progressDomElement = document.getElementById("recordProgress");
+    var playerDomElement = document.getElementById("audioPlayer");
+
+    //
+    function starter() {
+        mobooAudioRecord = new MobooLib.AudioRecord(
+            {
+                maxDuration: 20
+            }
+        );
+
+        //如果初始context出错，说明mcanvas或者audio context初始化出错
+        if (mobooAudioRecord.supportUserAudioMedia) {
+            //
+            console.log("mobooAudioRecord init ok.");
+
+            //
+            mobooAudioRecord.launch();
+
+            //
+            mobooAudioRecord.setOnProgressListener(function (time) {
+                progressDomElement.innerText = time.toFixed(1);
+            });
+
+            mobooAudioRecord.setOnRecordingListener(
+                function (status) {
+                    console.log(status);
+                }
+            );
+        } else {
+            console.log("mobooAudioRecord init error.");
+        }
+    }
+
+    function startRecord() {
+        if (mobooAudioRecord && mobooAudioRecord.supportUserAudioMedia && mobooAudioRecord.supportWebAudioApi) {
+            mobooAudioRecord.setMaxDuration(5.0);
+            mobooAudioRecord.start();
+        }
+    }
+
+    function stopRecord() {
+        if (mobooAudioRecord && mobooAudioRecord.supportUserAudioMedia && mobooAudioRecord.supportWebAudioApi) {
+            mobooAudioRecord.stop();
+        }
+    }
+
+    function destroyRecord() {
+        if (mobooAudioRecord) {
+            mobooAudioRecord.destroy();
+        }
+    }
+
+    //最后，获取截取的时间结果和音量。
+    function getResult() {
+        if (mobooAudioRecord && mobooAudioRecord.supportUserAudioMedia && mobooAudioRecord.supportWebAudioApi && !mobooAudioRecord.inRecording) {
+            playerDomElement.src = (window.URL || window.webkitURL).createObjectURL(mobooAudioRecord.getWavData());
+            playerDomElement.play();
+
+            //document.location.download = (window.URL || window.webkitURL).createObjectURL(mobooAudioRecord.getWavData());
+        }
+    }
+
+</script>
+</body>
+</html>

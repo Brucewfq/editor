@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <!--//-->
+    <title>Audio Crop - Moboo Lib</title>
+    <!--//css-->
+    <link rel="stylesheet" href="../css/moboolib.audiocrop.css">
+</head>
+<body>
+<div id="audioCropContainer" style="width:800px; height:256px; position: relative;background-color:#d5d5d5">
+</div>
+<button onclick="loadAudio('https://wavesurfer-js.org/example/split-channels/stereo.mp3')">Load</button>
+<button onclick="playAudio()">Play</button>
+<button onclick="reloadAudio('https://wavesurfer-js.org/example/split-channels/stereo.mp3')">reLoad</button>
+<button onclick="stopAudio()">Stop</button>
+<button onclick="setAudioVolume(0.5)">setVolume</button>
+<button onclick="getResult()">getCropResult</button>
+<button onclick="destroy()">Destroy</button>
+
+<!--the scripts-->
+<script type="text/javascript" src="../src/audiocrop/moboolib.audiocrop.js"></script>
+<script type="text/javascript">
+    var mobooAudioCrop = null;
+
+    //
+    function starter() {
+        //第一步，初始化对象(包括webaudio和canvas的初始化)
+        mobooAudioCrop = new MobooLib.AudioCrop(
+                {
+                    startSecs: 30,
+                    lengthSecs: 10
+                },
+                document.getElementById("audioCropContainer")
+        );
+
+        //mobooAudioCrop.setCropContainer();
+
+        console.log(mobooAudioCrop.audioLoaded);
+        //
+        mobooAudioCrop.setOnLoadedListener(
+                function () {
+                    console.log(mobooAudioCrop.audioLoaded);
+                    //todo,loaded后才能进行后续的操作。
+                }
+        );
+
+        //如果初始context出错，说明mcanvas或者audio context初始化出错
+        if (mobooAudioCrop.contextInited) {
+            //
+        } else {
+            alert("mobooAudioCrop init error.");
+        }
+    }
+
+    //第二步，加载声音文件
+    function loadAudio(audioFileUrl) {
+        if (!mobooAudioCrop) {
+            starter();
+            console.log(1);
+        }
+        if (mobooAudioCrop && mobooAudioCrop.contextInited) {
+            mobooAudioCrop.loadAudio(audioFileUrl);
+        }
+    }
+
+    function reloadAudio(audioFileUrl) {
+        if (mobooAudioCrop && mobooAudioCrop.contextInited) {
+            mobooAudioCrop.loadAudio(audioFileUrl, {startSecs: 15, lengthSecs: 10});
+        }
+    }
+
+    //播放声音，初始化完后，应该立即就播放。
+    function playAudio() {
+        if (mobooAudioCrop && mobooAudioCrop.contextInited) {
+            mobooAudioCrop.playAudio();
+        }
+    }
+
+    //停止播放
+    function stopAudio() {
+        if (mobooAudioCrop && mobooAudioCrop.contextInited) {
+            mobooAudioCrop.stopAudio();
+            document.getElementById('audioCropContainer').innerHTML = '';
+            console.log(mobooAudioCrop.audioContext)
+        }
+    }
+
+    //用来控制音量
+    function setAudioVolume(volume) {
+        if (mobooAudioCrop && mobooAudioCrop.audioLoaded) {
+            mobooAudioCrop.setAudioVolume(volume);
+        }
+    }
+
+    //最后，获取截取的时间结果和音量。
+    function getResult() {
+        if (mobooAudioCrop && mobooAudioCrop.audioLoaded) {
+            console.log(JSON.stringify(mobooAudioCrop.getCropResult()));
+        }
+    }
+
+    //destroy
+    function destroy() {
+        if (mobooAudioCrop && mobooAudioCrop.contextInited) {
+            mobooAudioCrop.stopAudio();
+        }
+        if (mobooAudioCrop) {
+
+            mobooAudioCrop.destroy();
+            mobooAudioCrop = null;
+            document.getElementById('audioCropContainer').innerHTML = '';
+        }
+    }
+
+</script>
+</body>
+</html>
